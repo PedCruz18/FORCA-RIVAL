@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* Reset de margens e padding */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+    
+        /* Corpo da página */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            color: #fff;
+            overflow: hidden;
+        }
+    
+        /* Contêiner principal */
+        .container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            padding: 30px;
+            width: 350px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            opacity: 0;
+            animation: slideIn 0.5s ease-in-out forwards;
+        }
+    
+        /* Tela de opções de sala */
+        .container-sala {
+            background-color: #ffffff;
+            border-radius: 15px;
+            padding: 30px;
+            width: 350px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            opacity: 0;
+            animation: slideIn 0.5s ease-in-out forwards;
+        }
+
+
+        /* Estilo para os botões no container-sala */
+        .container-sala button {
+            margin-top: 15px; /* Adiciona espaçamento vertical entre os botões */
+        }
+
+
+        .container-gerenciamento {
+            background-color: #fff;         /* Cor de fundo branca */
+            border-radius: 8px;             /* Bordas arredondadas */
+            border: 1px solid #ddd;        /* Borda sutil */
+            padding: 20px;                  /* Espaçamento interno */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Sombra suave */
+            max-width: 500px;               /* Largura máxima */
+            margin: 0 auto;                 /* Centraliza no meio da tela */
+            text-align: center;             /* Centraliza o texto */
+            font-family: Arial, sans-serif; /* Fonte simples */
+        }
+
+        .container-gerenciamento h2 {
+            font-size: 24px;
+            color: #333;                    /* Cor do título */
+            margin-bottom: 15px;            /* Espaçamento abaixo do título */
+        }
+
+        .container-gerenciamento p {
+            font-size: 18px;
+            color: #555;                    /* Cor do texto */
+            margin-bottom: 15px;            /* Espaçamento entre parágrafos */
+        }
+
+        .container-gerenciamento .btn-play {
+            background-color: #007bff;      /* Cor de fundo do botão */
+            color: white;                   /* Cor do texto do botão */
+            padding: 10px 20px;              /* Tamanho do botão */
+            border: none;                   /* Remove borda padrão */
+            border-radius: 5px;             /* Borda arredondada */
+            cursor: pointer;                /* Cursor de ponteiro */
+            font-size: 16px;                 /* Tamanho da fonte */
+            transition: background-color 0.3s; /* Transição suave */
+        }
+
+        .container-gerenciamento .btn-play:hover {
+            background-color: #0056b3;      /* Cor de fundo ao passar o mouse */
+        }
+
+
+        /* Animação para a entrada da página */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    
+        /* Estilo do título */
+        h1 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+    
+        /* Subtítulo */
+        h2 {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+    
+        /* Estilo do botão "Play" */
+        .btn-play {
+            background-color: #6a11cb;
+            color: #fff;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.2rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+    
+        .btn-play:hover {
+            background-color: #2575fc;
+            transform: scale(1.05);
+        }
+    
+        .btn-play:focus {
+            outline: none;
+        }
+    
+        /* Contêiner do jogo */
+        .game-container {
+            display: none;
+            background-color: #ffffff;
+            border-radius: 15px;
+            padding: 30px;
+            width: 350px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            opacity: 0;
+            animation: slideIn 0.5s ease-in-out forwards;
+        }
+    
+        /* Estilo para a palavra */
+        .palavra {
+            font-size: 3rem;
+            letter-spacing: 10px;
+            margin-bottom: 25px;
+            color: #333;
+            font-weight: bold;
+        }
+    
+        /* Teclado */
+        .teclado {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center; /* Centraliza os botões dentro do container */
+            gap: 12px;
+            margin-top: 20px;
+            width: 100%;
+            overflow: hidden;
+        }
+    
+        .teclado button {
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+            padding: 12px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    
+        .teclado button:hover {
+            background-color: #ddd;
+            transform: scale(1.1);
+        }
+    
+        .teclado button:active {
+            transform: scale(0.95);
+        }
+    
+        .teclado button:focus {
+            outline: none;
+        }
+    
+        /* Rodapé */
+        .footer {
+            font-size: 0.9rem;
+            color: #fff;
+            margin-top: 20px;
+            text-align: center;
+        }
+    
+        /* Responsividade para telas menores */
+        @media (max-width: 600px) {
+            .container, .game-container {
+                width: 100%;
+                padding: 20px;
+            }
+    
+            .palavra {
+                font-size: 2.5rem;
+            }
+    
+            .teclado button {
+                font-size: 1rem;
+                padding: 10px;
+            }
+        }
+    </style>
+    
+    
+    
+</head>
+<body>
+    <header>
+        <h1>FORCA RIVAL</h1>
+    </header>
+
+    <div class="container">
+        <h2>Bem-vindo ao ForcaRival!</h2>
+        <button class="btn-play" id="playButton">Jogar</button>
+    </div>
+    
+    <div class="container-sala" id="containerSala" style="display: none;">
+        <h2>Escolha uma opção</h2>
+        <button class="btn-play" id="criarSalaButton">Criar Sala</button>
+        <button class="btn-play" id="entrarSalaButton">Entrar em Sala</button>
+    
+        <!-- Campo para inserir o ID da sala -->
+        <input type="text" id="salaIdInput" placeholder="Digite o ID da sala" style="display: none;">
+    </div>
+    
+
+    <div class="game-container" id="gameContainer" style="display: none;">
+        <h2>Jogo em andamento...</h2>
+        <div class="palavra" id="palavra">_ _ _ _ _</div>
+        <div class="teclado" id="teclado"></div>
+    </div>
+
+    <div class="container-gerenciamento" id="containerGerenciamento" style="display: none;">
+        <h2>Gerenciamento da Sala</h2>
+        <p><strong>ID da Sala:</strong> <span id="salaId"></span></p>
+        <p>Aguardando jogadores...</p>
+    
+        <!-- Área para exibir os jogadores conectados -->
+        <div id="jogadoresConectados">
+            <!-- Jogadores serão listados aqui -->
+        </div>
+    
+        <button class="btn-play" id="iniciarJogoButton" style="display: none;">Iniciar Partida</button>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 ForcaRival. Todos os direitos reservados.</p>
+    </footer>
+
+    <script type="module">
+        // Configurações do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBq8gGhrCFAmwP2zj5ud9TgmO_IZCUfP-g",
+            authDomain: "chat17-59c10.firebaseapp.com",
+            projectId: "chat17-59c10",
+            storageBucket: "chat17-59c10.appspot.com",
+            messagingSenderId: "492794526402",
+            appId: "1:492794526402:web:182ef4acb5c1af7570995b"
+        };
+    
+        // Importar as funções necessárias do Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue, get, update } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+    
+        // Inicializar o Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+    
+        // Referências do Firebase
+        const jogadoresRef = ref(database, 'jogo/jogadores');
+        const jogadaAtualRef = ref(database, 'jogo/jogadaAtual'); // Referência para o jogador da vez
+
+
+        // Referência dos elementos HTML
+        const playButton = document.getElementById("playButton");
+        const criarSalaButton = document.getElementById("criarSalaButton");
+        const entrarSalaButton = document.getElementById("entrarSalaButton");
+        const container = document.querySelector(".container");
+        const containerSala = document.getElementById("containerSala");
+
+        const containerGerenciamento = document.getElementById("containerGerenciamento");
+        const iniciarJogoButton = document.getElementById("iniciarJogoButton");
+        const salaIdElement = document.getElementById("salaId");
+
+        // Referência dos elementos HTML
+        const salaIdInput = document.getElementById('salaIdInput');
+
+        let palavra = null;
+        let letrasCorretas = [];
+        let jogadores = null;
+        let letrasUsadas = []; // Array para armazenar as letras já usadas
+    
+        // Variáveis globais para armazenar os IDs dos jogadores
+        let jogador1Id = null;
+        let jogador2Id = null;
+
+        // Função para gerar um identificador único
+        function gerarIdUnico() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+                const r = (Math.random() * 16) | 0;
+                const v = c === 'x' ? r : (r & 0x3) | 0x8;
+                return v.toString(16);
+            });
+        }
+    
+        // Recuperar ou gerar o ID único do jogador
+        let jogadorId = localStorage.getItem('jogadorId');
+        if (!jogadorId) {
+            jogadorId = gerarIdUnico();
+            localStorage.setItem('jogadorId', jogadorId);
+        }
+        console.log('ID do jogador:', jogadorId);
+    
+        // Listener para monitorar o nó 'jogadores'
+        onValue(jogadoresRef, (snapshot) => {
+            jogadores = snapshot.val();
+            if (jogadores && Object.keys(jogadores).length === 2) {
+                // Atualizar jogador1Id e jogador2Id assim que dois jogadores estiverem conectados
+                const jogadoresList = Object.values(jogadores);
+                jogador1Id = jogadoresList[0];  // Atribui o primeiro jogador
+                jogador2Id = jogadoresList[1];  // Atribui o segundo jogador
+
+                console.log('Jogador 1 ID:', jogador1Id);
+                console.log('Jogador 2 ID:', jogador2Id);
+
+                // Iniciar o jogo
+                criarTeclado();
+                atualizarPalavra();
+            } else {
+                // Caso contrário, exibe mensagem de espera
+                const teclado = document.getElementById('teclado');
+                teclado.innerHTML = ''; // Limpa o teclado
+                const mensagem = document.createElement('p');
+                mensagem.textContent = "Aguardando outro jogador...";
+                teclado.appendChild(mensagem);
+            }
+        });
+
+    
+        function iniciarJogo() {
+            const salaId = salaIdElement.textContent; // Pega o ID da sala atual
+            const salaRef = ref(database, `salas/${salaId}`);  // Referência à sala específica
+
+            // Atualizar o status da sala para "Jogo em andamento"
+            update(salaRef, {
+                status: "Jogo em andamento"
+            });
+
+            containerGerenciamento.style.display = "none";
+            document.querySelector(".game-container").style.display = "block";
+
+            // Configuração do jogo com base na sala
+            configurarJogo(salaId);
+        }
+
+        function configurarPalavra(salaRef) {
+            onValue(salaRef, (snapshot) => {
+                const jogoData = snapshot.val();
+                console.log("Dados da sala:", snapshot.val());
+                
+
+                if (jogoData && jogoData.palavra) {
+                    palavra = jogoData.palavra;
+                    letrasCorretas = jogoData.palavraAtualizada.split(' ');
+                } else {
+                    // Aqui você pode colocar um fallback, mas em caso de erro de estrutura de jogo, algo está errado
+                    console.log("Estrutura de jogo não encontrada na sala!");
+                }
+
+                atualizarPalavra();
+                criarTeclado();
+            });
+        }
+
+        function configurarJogo(salaId) {
+            // Referência para a sala específica (onde o ID do jogador 1 e jogador 2 estão)
+            const salaRef = ref(database, `salas/${salaId}/jogo`);
+            const jogador1Ref = ref(database, `salas/${salaId}/jogadores/Jogador 1`); // Posição onde o jogador 1 está armazenado
+            const jogador2Ref = ref(database, `salas/${salaId}/jogadores/Jogador 2`); // Posição onde o jogador 2 está armazenado
+
+            // Log para verificar os valores de jogador1Id e jogador2Id
+            console.log("Valores dos jogadores antes da busca:", { jogador1Id, jogador2Id });
+
+            // Buscar o valor de jogador 1 e jogador 2 do Firebase
+            Promise.all([get(jogador1Ref), get(jogador2Ref)]).then(([snapshot1, snapshot2]) => {
+                if (snapshot1.exists()) {
+                    jogador1Id = snapshot1.val(); // Atribuir o ID do jogador 1 vindo do Firebase
+                    console.log("Jogador 1 ID recuperado do Firebase:", jogador1Id);
+                } else {
+                    console.log("Jogador 1 não encontrado no Firebase.");
+                }
+
+                if (snapshot2.exists()) {
+                    jogador2Id = snapshot2.val(); // Atribuir o ID do jogador 2 vindo do Firebase
+                    console.log("Jogador 2 ID recuperado do Firebase:", jogador2Id);
+                } else {
+                    console.log("Jogador 2 não encontrado no Firebase.");
+                }
+
+                // Agora que temos ambos os jogadores, podemos configurar o jogo
+                set(salaRef, {
+                    palavra: "HELLO", // Definir uma palavra de exemplo (você pode usar uma palavra aleatória ou mais complexa)
+                    palavraAtualizada: "_ _ _ _ _", // Inicializar a palavra com underscores
+                    tentativas: [], // Inicializar as tentativas de letras erradas
+                    jogadores: { jogador1Id, jogador2Id }, // Inicializar a lista de jogadores
+                    jogadaAtual: jogador1Id, // Definir o primeiro jogador como o jogador da vez
+                }).then(() => {
+                    console.log("Jogo configurado com sucesso!");
+                    // Iniciar o processo de verificação de palavra ou outras configurações
+                    configurarPalavra(salaRef);
+                }).catch((error) => {
+                    console.error("Erro ao configurar o jogo:", error);
+                });
+            }).catch((error) => {
+                console.error("Erro ao recuperar os jogadores do Firebase:", error);
+            });
+        }
+
+        // Função para atualizar a palavra na tela
+        function atualizarPalavra() {
+            if (palavra) {
+                document.getElementById('palavra').textContent = letrasCorretas.join(' ');
+            }
+        }
+    
+        function criarTeclado() {
+            const teclado = document.getElementById('teclado');
+            teclado.innerHTML = ''; // Limpa o teclado
+
+            const salaId = salaIdElement.textContent; // Pega o ID da sala atual
+            const salaRef = ref(database, `salas/${salaId}/jogo`); // Referência para a sala
+
+            // Verificar quem é o jogador da vez
+            get(salaRef).then((snapshot) => {
+                const jogoData = snapshot.val();
+
+                // Se o jogador da vez for o jogador atual, exibe o teclado
+                if (jogoData && jogoData.jogadaAtual === jogadorId) {
+                    const alfabeto = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+                    const letrasErradas = alfabeto.filter((letra) =>
+                        palavra && !palavra.includes(letra) && !letrasUsadas.includes(letra)
+                    );
+
+                    const letrasRestantes = palavra.split('').filter((letra, index) =>
+                        letrasCorretas[index] === '_'
+                    );
+
+                    if (letrasRestantes.length === 0) {
+                        console.log("Não há letras restantes para adivinhar!");
+                        return;
+                    }
+
+                    // Seleciona uma letra correta
+                    const letraAleatoria = letrasRestantes[Math.floor(Math.random() * letrasRestantes.length)];
+
+                    // Seleciona 4 letras erradas
+                    const letrasErradasSelecionadas = getRandomItems(letrasErradas, 4);
+
+                    // Cria o array de 5 letras (1 correta + 4 erradas)
+                    const letrasParaMostrar = [letraAleatoria, ...letrasErradasSelecionadas];
+
+                    // Embaralha as letras
+                    const letrasMisturadas = shuffleArray(letrasParaMostrar);
+
+                    // Cria os botões no teclado
+                    letrasMisturadas.forEach((letra) => {
+                        const botao = document.createElement('button');
+                        botao.textContent = letra;
+                        botao.addEventListener('click', () => verificarLetra(letra));
+                        teclado.appendChild(botao);
+                    });
+                } else {
+                    // Caso contrário, exibe mensagem de espera
+                    const mensagem = document.createElement('p');
+                    mensagem.textContent = "Aguardando sua vez...";
+                    teclado.appendChild(mensagem);
+                }
+            }).catch((error) => {
+                console.error("Erro ao acessar os dados da sala:", error);
+            });
+        }
+
+        function verificarLetra(letra) {
+                if (!palavra) return;
+
+                // Referências da sala e do jogador da vez
+                const salaId = salaIdElement.textContent;
+                const jogadaAtualRef = ref(database, `salas/${salaId}/jogo/jogadaAtual`); // Referência para o jogador da vez
+
+                // Verificar se a letra já foi usada
+                if (letrasUsadas.includes(letra)) {
+                    alert("Esta letra já foi usada!");
+                    return;
+                }
+                letrasUsadas.push(letra);
+
+                // Obter o jogador atual e verificar se é a vez dele
+                get(jogadaAtualRef).then((snapshot) => {
+                    const jogadorDaVezId = snapshot.val(); // ID do jogador da vez
+
+                    // Garantir que o jogador da vez está jogando
+                    if (jogadorDaVezId !== jogadorId) {
+                        alert("Não é sua vez!");
+                        return;
+                    }
+
+                    // Processo de verificação da letra
+                    let acertou = false;
+                    for (let i = 0; i < palavra.length; i++) {
+                        if (palavra[i].toUpperCase() === letra) {
+                            letrasCorretas[i] = letra;
+                            acertou = true;
+                        }
+                    }
+
+                    // Log indicando se o jogador acertou ou não
+                    if (acertou) {
+                        console.log(`Jogador ${jogadorId} acertou a letra "${letra}"!`);
+                    } else {
+                        console.log(`Jogador ${jogadorId} errou a letra "${letra}".`);
+                    }
+
+                    // Se o jogador não acertar a letra, trocar o turno
+                    if (!acertou) {
+                        // Alternar para o próximo jogador
+                        const proximoJogadorId = (jogadorDaVezId === jogador1Id) ? jogador2Id : jogador1Id;
+
+                        if (proximoJogadorId) {
+                            console.log(`Turno trocado: de ${jogadorDaVezId} para ${proximoJogadorId}`);
+                            set(jogadaAtualRef, proximoJogadorId) // Atualiza o jogador da vez no Firebase
+                                .then(() => {
+                                    console.log(`Jogador da vez atualizado para ${proximoJogadorId}`);
+                                })
+                                .catch((error) => {
+                                    console.error("Erro ao atualizar o jogador da vez no Firebase:", error);
+                                });
+                        } else {
+                            console.error("Erro ao determinar o próximo jogador. Verifique as variáveis jogador1Id e jogador2Id.");
+                        }
+                    } else {
+                        console.log("Letra correta! O jogador atual continua jogando.");
+                    }
+
+                    // Atualizar as informações no Firebase (palavra e tentativas)
+                    update(ref(database, `salas/${salaId}/jogo`), {
+                        palavraAtualizada: letrasCorretas.join(' '),
+                        tentativas: letrasUsadas
+                    }).catch((error) => {
+                        console.error("Erro ao atualizar o estado do jogo no Firebase:", error);
+                    });
+
+                    // Verificar se o jogador venceu após a jogada
+                    verificarVencedor();
+                }).catch((error) => {
+                    console.error("Erro ao acessar a jogada atual:", error);
+                });
+            }
+
+        function getRandomItems(arr, n) {
+            let result = [];
+            let len = arr.length;
+            let taken = new Array(len);
+            while (n--) {
+                let x = Math.floor(Math.random() * len);
+                result[n] = arr[x in taken ? taken[x] : x];
+                taken[x] = --len;
+            }
+            return result;
+        }
+    
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+    
+        function verificarVencedor() {
+            if (letrasCorretas.join('') === palavra) {
+                const vencedor = Object.keys(jogadores).find(key => jogadores[key] === jogadorId);
+                
+                update(ref(database, 'jogo'), {
+                    vencedor: vencedor
+                });
+
+                resetarJogo();
+            }
+        }
+
+        // Ouvir o vencedor para exibir o reset para todos os jogadores
+        const vencedorRef = ref(database, 'jogo/vencedor');
+        onValue(vencedorRef, (snapshot) => {
+            const vencedor = snapshot.val();
+            if (vencedor) {
+                // Se um vencedor for registrado, todos voltam à tela inicial
+                alert(`${vencedor} venceu o jogo!`);
+                document.querySelector(".container").style.display = "block";
+                document.querySelector(".game-container").style.display = "none";
+            }
+        });
+
+        function resetarJogo() {
+            // Apaga toda a estrutura de dados do Firebase para o jogo
+            const jogoRef = ref(database, 'jogo');
+            set(jogoRef, null)  // Apaga todos os dados relacionados ao jogo
+
+            // Reinicia a página
+            setTimeout(() => {
+                location.reload(); // Recarrega a página
+            }, 1000); // Espera 1 segundo antes de recarregar para permitir que o Firebase se atualize
+
+            // Exibe o botão de jogar novamente ou outras opções
+            document.querySelector(".container").style.display = "block";
+            document.querySelector(".game-container").style.display = "none";
+        }
+
+        criarSalaButton.addEventListener("click", () => {
+            const salaId = gerarIdSala(); // Gera um ID de sala com 5 caracteres
+            const salaRef = ref(database, `salas/${salaId}`);
+
+            // Salvar o ID do Jogador 1 no início
+            jogador1Id = jogadorId;
+
+            // Log para verificar se o jogador1Id foi atribuído corretamente
+            console.log("Jogador 1 ID atribuído:", jogador1Id);
+
+            // Criar sala no Firebase
+            set(salaRef, {
+                host: jogador1Id, // Jogador que cria a sala
+                jogadores: {
+                    "Jogador 1": jogador1Id // Definir o host como "Jogador 1"
+                },
+                status: "Aguardando jogadores", // Status da sala
+            }).then(() => {
+                console.log("Sala criada com sucesso. ID da sala:", salaId);
+
+                // Criar a estrutura do jogo apenas quando a sala for criada
+                const jogoRef = ref(database, `salas/${salaId}/jogo`);
+                set(jogoRef, {
+                    palavra: "HELLO", // Palavra inicial
+                    palavraAtualizada: "_ _ _ _ _", // Palavra atualizada com underscores
+                    tentativas: [],
+                    jogadores: {jogador1Id}, // Jogadores dentro da sala
+                }).then(() => {
+                    console.log("Estrutura do jogo criada com sucesso na sala:", salaId);
+
+                    // Após a criação da sala, adicionar o listener para os jogadores
+                    onValue(ref(database, `salas/${salaId}/jogadores`), (snapshot) => {
+                        const jogadoresNaSala = snapshot.val();
+                        if (jogadoresNaSala) {
+                            console.log("Jogadores conectados na sala:", jogadoresNaSala);
+
+                            // Atualizar a lista de jogadores conectados
+                            exibirJogadoresConectados(jogadoresNaSala);
+
+                            const jogadoresCount = Object.keys(jogadoresNaSala).length;
+                            console.log("Número de jogadores conectados:", jogadoresCount);
+
+                            if (jogadoresCount >= 2) {
+                                iniciarJogoButton.style.display = "block"; // Habilitar o botão para iniciar o jogo
+                            } else {
+                                iniciarJogoButton.style.display = "none";
+                            }
+                        }
+                    });
+
+                    // Exibir o ID da sala no contêiner de gerenciamento
+                    salaIdElement.textContent = salaId;
+
+                    // Alterar visibilidade dos contêineres
+                    containerSala.style.display = "none";
+                    containerGerenciamento.style.display = "block";
+                }).catch((error) => {
+                    console.error("Erro ao criar o jogo na sala:", error);
+                });
+            }).catch((error) => {
+                console.error("Erro ao criar a sala:", error);
+            });
+        });
+
+        // Função para exibir os jogadores conectados na interface
+        function exibirJogadoresConectados(jogadoresNaSala) {
+            const jogadoresDiv = document.getElementById('jogadoresConectados');
+            jogadoresDiv.innerHTML = ''; // Limpa a lista de jogadores
+
+            // Loop para adicionar cada jogador à lista
+            Object.keys(jogadoresNaSala).forEach((key, index) => {
+                const jogadorId = jogadoresNaSala[key];
+                const jogadorItem = document.createElement('p');
+                jogadorItem.textContent = `Jogador ${index + 1}: ${jogadorId}`;
+                jogadoresDiv.appendChild(jogadorItem);
+            });
+        }
+
+        // Função para gerar um ID de sala com 5 caracteres alfanuméricos
+        function gerarIdSala() {
+            const caracteres = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let id = '';
+            for (let i = 0; i < 5; i++) {
+                id += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+            }
+            return id;
+}
+        // Função para iniciar a partida
+
+        // Função para iniciar a partida
+        iniciarJogoButton.addEventListener("click", () => {
+            const salaId = salaIdElement.textContent;
+            const salaRef = ref(database, `salas/${salaId}`);
+
+            update(salaRef, {
+                status: "Jogo em andamento"
+            });
+
+            containerGerenciamento.style.display = "none";
+            document.querySelector(".game-container").style.display = "block";
+        });
+                
+        entrarSalaButton.addEventListener("click", () => {
+            const salaId = prompt("Digite o ID da sala:");
+            const salaRef = ref(database, `salas/${salaId}/jogadores`); // A referência para jogadores dentro da sala
+            const statusSalaRef = ref(database, `salas/${salaId}/status`); // Referência ao status da sala
+
+            // Verificar se a sala existe antes de tentar entrar
+            get(salaRef).then((snapshot) => {
+                if (snapshot.exists()) {
+                    const jogadoresNaSala = snapshot.val(); // Lista de jogadores na sala
+
+                    if (Object.keys(jogadoresNaSala).length < 2) {
+                        // Se houver espaço para mais jogadores, adicionar o jogador 2
+                        const jogadorNumero = Object.keys(jogadoresNaSala).length + 1; // Identificar qual jogador está sendo adicionado
+                        const jogadorKey = `Jogador ${jogadorNumero}`;  // Definir chave do jogador como "Jogador 2"
+
+                        // Salvar o ID do Jogador 2 se ele estiver entrando como o segundo jogador
+                        if (jogadorNumero === 2) {
+                            jogador2Id = jogadorId;
+                            console.log("Jogador 2 ID atribuído:", jogador2Id);
+                        }
+
+                        // Atualize a lista de jogadores dentro da sala
+                        update(salaRef, {
+                            [jogadorKey]: jogadorId // Adicionar o jogador na sala
+                        }).then(() => {
+                            // Atualizar a interface
+                            containerSala.style.display = "none";
+                            containerGerenciamento.style.display = "block";
+                            salaIdElement.textContent = salaId; // Exibir o ID da sala na interface de gerenciamento
+
+                            // Monitorar os jogadores conectados
+                            onValue(salaRef, (snapshot) => {
+                                const jogadoresNaSala = snapshot.val();
+                                if (jogadoresNaSala && typeof jogadoresNaSala === 'object') {
+                                    exibirJogadoresConectados(jogadoresNaSala); // Exibir os jogadores conectados
+                                }
+                            });
+
+                            // Verificar se já existem 2 jogadores para habilitar o botão de iniciar o jogo
+                            const jogadoresCount = Object.keys(jogadoresNaSala).length;
+                            if (jogadoresCount >= 2) {
+                                iniciarJogoButton.style.display = "block"; // Habilitar o botão para iniciar o jogo
+                            } else {
+                                iniciarJogoButton.style.display = "none";
+                            }
+
+                            // Monitorar o status da sala para iniciar o jogo automaticamente quando estiver em andamento
+                            onValue(statusSalaRef, (snapshot) => {
+                                const statusSala = snapshot.val();
+                                if (statusSala === "Jogo em andamento") {
+                                    // Fechar o container de gerenciamento da sala e abrir o container do jogo
+                                    containerGerenciamento.style.display = "none";
+                                    document.querySelector(".game-container").style.display = "block";
+                                    iniciarJogo();
+                                }
+                            });
+
+                        });
+                    } else {
+                        alert("A sala já está cheia.");
+                    }
+                } else {
+                    alert("ID da sala inválido.");
+                }
+            }).catch((error) => {
+                console.error("Erro ao acessar a sala:", error);
+                alert("Erro ao tentar acessar a sala. Tente novamente.");
+            });
+        });
+
+        salaIdInput.addEventListener("change", () => {
+            const salaId = salaIdInput.value.trim();
+            if (salaId) {
+                const salaRef = ref(database, `salas/${salaId}`);
+                
+                get(salaRef).then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const salaData = snapshot.val();
+                        const jogadores = salaData ? salaData.jogadores : null;
+
+                        if (jogadores && Object.values(jogadores).includes(jogadorId)) {
+                            alert("Você já está conectado a essa sala!");
+                        } else {
+                            // Adicionar o jogador à sala
+                            const jogadorKey = `Jogador ${Object.keys(jogadores || {}).length + 1}`;
+                            update(salaRef, {
+                                [`jogadores/${jogadorKey}`]: jogadorId
+                            });
+
+                            salaIdElement.textContent = salaId;
+                            containerSala.style.display = "none";
+                            containerGerenciamento.style.display = "block";
+                        }
+                    } else {
+                        alert("A sala não existe! Verifique o ID.");
+                    }
+                }).catch((error) => {
+                    console.error("Erro ao tentar acessar a sala:", error);
+                    alert("Erro ao acessar a sala. Tente novamente.");
+                });
+            }
+        });
+
+        // Durante a inicialização do jogo (botão iniciar)
+        iniciarJogoButton.addEventListener("click", () => {
+            const salaId = salaIdElement.textContent;
+            const salaRef = ref(database, `salas/${salaId}`);
+
+            // Atualizar o status da sala para "Jogo em andamento"
+            update(salaRef, {
+                status: "Jogo em andamento"
+            });
+
+            // Atualizar a visibilidade da interface
+            containerGerenciamento.style.display = "none";
+            document.querySelector(".game-container").style.display = "block";
+
+            // Configuração do jogo com base na sala
+            iniciarJogo()
+            console.log("passEII AQUIJHJJJJJJJJJJJ");
+        });
+
+        playButton.addEventListener("click", () => {
+            container.style.display = "none";
+            containerSala.style.display = "block";
+        });
+
+    </script>
+    
+    
+    
+    
+</body>
+</html>
