@@ -224,9 +224,7 @@
                 padding: 10px;
             }
         }
-    </style>
-    
-    
+    </style>  
     
 </head>
 <body>
@@ -285,7 +283,7 @@
     
         // Importar as funções necessárias do Firebase SDK
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue, get, update } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+        import { getDatabase, ref, set, onValue, get, update, remove } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
     
         // Inicializar o Firebase
         const app = initializeApp(firebaseConfig);
@@ -601,43 +599,142 @@
             return arr;
         }
     
+        // Função para verificar o vencedor com base no Firebase
         function verificarVencedor() {
-            if (letrasCorretas.join('') === palavra) {
-                const vencedor = Object.keys(jogadores).find(key => jogadores[key] === jogadorId);
-                
-                update(ref(database, 'jogo'), {
-                    vencedor: vencedor
-                });
+            const salaId = salaIdElement.textContent; // Obtém o ID da sala atual
+            const salaRef = ref(database, `salas/${salaId}/jogo`); // Referência ao jogo no Firebase
 
-                resetarJogo();
+            console.log(`Sala ID: ${salaId}`); // Exibe o ID da sala
+
+            // Certifica-se de que a palavra e as letras corretas estejam definidas
+            if (!palavra || !letrasCorretas) {
+                console.error("A palavra ou as letras corretas não foram inicializadas.");
+                return;
+            }
+
+            console.log(`Palavra correta: ${palavra}`);
+            console.log(`Letras corretas até o momento: ${letrasCorretas.join('')}`);
+
+            // Verifica se todas as letras corretas foram preenchidas
+            if (letrasCorretas.join('') === palavra) {
+                console.log("Todas as letras corretas foram preenchidas. Verificando o vencedor...");
+
+                // Recupera o jogador mais recente do Firebase (jogadaAtual)
+                get(ref(database, `salas/${salaId}/jogo/jogadaAtual`))
+                    .then((snapshotJogadaAtual) => {
+                        if (snapshotJogadaAtual.exists()) {
+                            const jogadorAtualId = snapshotJogadaAtual.val(); // ID do último jogador
+                            console.log(`Jogada atual encontrada: ID do jogador atual é ${jogadorAtualId}`);
+
+                            // O ID do jogador atual será usado como o vencedor
+                            const vencedor = jogadorAtualId;
+
+                            // Atualiza o estado do jogo com o vencedor
+                            update(salaRef, {
+                                vencedor: vencedor,
+                                status: "Finalizado" // Define o status como finalizado
+                            })
+                                .then(() => {
+
+                                    // Redireciona todos os jogadores para a tela inicial após o término
+                                    //reiniciarJogo(salaId); // Chama a função para reiniciar e limpar a sala
+                                })
+                                .catch((error) => {
+                                    console.error("Erro ao registrar o vencedor no Firebase:", error);
+                                });
+                        } else {
+                            console.error("Jogada atual não encontrada no Firebase.");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error("Erro ao acessar o nó 'jogadaAtual' no Firebase:", error);
+                    });
             }
         }
-
-        // Ouvir o vencedor para exibir o reset para todos os jogadores
-        const vencedorRef = ref(database, 'jogo/vencedor');
-        onValue(vencedorRef, (snapshot) => {
-            const vencedor = snapshot.val();
-            if (vencedor) {
-                // Se um vencedor for registrado, todos voltam à tela inicial
-                alert(`${vencedor} venceu o jogo!`);
-                document.querySelector(".container").style.display = "block";
-                document.querySelector(".game-container").style.display = "none";
+       
+        function reiniciarJogo(salaId) {
+            if (!salaId) {
+                console.error("ID da sala não fornecido.");
+                return;
             }
-        });
 
-        function resetarJogo() {
-            // Apaga toda a estrutura de dados do Firebase para o jogo
-            const jogoRef = ref(database, 'jogo');
-            set(jogoRef, null)  // Apaga todos os dados relacionados ao jogo
+            const salaRef = ref(database, `salas/${salaId}`);  // Referência para a sala com o ID fornecido
 
-            // Reinicia a página
-            setTimeout(() => {
-                location.reload(); // Recarrega a página
-            }, 1000); // Espera 1 segundo antes de recarregar para permitir que o Firebase se atualize
+            // Verifique se a sala existe no Firebase
+            get(salaRef)
+                .then((snapshot) => {
+                    if (!snapshot.exists()) {
+                        console.error(`Sala com ID ${salaId} não encontrada.`);
+                        return;
+                    }
 
-            // Exibe o botão de jogar novamente ou outras opções
-            document.querySelector(".container").style.display = "block";
+                    // A sala existe, podemos limpar os dados dentro dela
+                    console.log(`Tentando limpar os dados da sala com ID: ${salaId}`);
+                    
+                    // Usando `update()` para limpar os dados dentro da sala, mas manter a chave da sala
+                    update(salaRef, {
+                        host: null,
+                        jogadores: {},         // Limpar os jogadores
+                        status: null,
+                        jogo: null,      // Limpar o status
+                    })
+                        .then(() => {
+                            console.log(`Dados da sala com ID ${salaId} limpos com sucesso.`);
+                        })
+                        .catch((error) => {
+                            console.error("Erro ao limpar os dados da sala:", error);
+                        });
+                })
+                .catch((error) => {
+                    console.error("Erro ao verificar a existência da sala:", error);
+                });
+        }
+
+        // Função para reiniciar a interface após o jogo terminar
+        function reiniciarInterface() {
             document.querySelector(".game-container").style.display = "none";
+            containerGerenciamento.style.display = "block";
+            salaIdElement.textContent = ""; // Limpar ID da sala
+            letrasCorretas = [];
+            letrasUsadas = [];
+            location.reload();
+        }
+
+        // Listener para monitorar se o status do jogo está como "Finalizado"
+        function monitorarStatusDeVencedor() {
+            const salaId = salaIdElement.textContent; // Obtém o ID da sala atual
+            const salaRef = ref(database, `salas/${salaId}/jogo/status`); // Referência ao status no Firebase
+
+            onValue(salaRef, (snapshot) => {
+                const statusAtual = snapshot.val();
+
+                if (statusAtual === "Finalizado") {
+                    console.log("O jogo foi finalizado. Verificando vencedor...");
+
+                    // Obtem o vencedor para exibir a mensagem
+                    get(ref(database, `salas/${salaId}/jogo/vencedor`))
+                        .then((snapshotVencedor) => {
+                            if (snapshotVencedor.exists()) {
+                                const vencedorId = snapshotVencedor.val();
+                                console.log(`Vencedor identificado: Jogador com ID ${vencedorId}`);
+                                alert(`Parabéns, o jogador com o ID ${vencedorId} venceu o jogo!`);
+
+                                // Reinicia a interface
+                                reiniciarJogo(salaId);
+
+                                // Adiciona um timer de 5 segundos antes de reiniciar o jogo
+                                setTimeout(() => {
+                                    reiniciarInterface(); // Passa o ID da sala para reiniciar o jogo
+                                }, 1000); // Delay de 5 segundos (5000 milissegundos)
+                            } else {
+                                console.error("O vencedor não foi encontrado no Firebase.");
+                            }
+                        })
+                        .catch((error) => {
+                            console.error("Erro ao buscar o vencedor no Firebase:", error);
+                        });
+                }
+            });
         }
 
         criarSalaButton.addEventListener("click", () => {
@@ -740,6 +837,7 @@
 
             containerGerenciamento.style.display = "none";
             document.querySelector(".game-container").style.display = "block";
+            monitorarStatusDeVencedor();
         });
                 
         entrarSalaButton.addEventListener("click", () => {
@@ -796,6 +894,7 @@
                                     containerGerenciamento.style.display = "none";
                                     document.querySelector(".game-container").style.display = "block";
                                     iniciarJogo();
+                                    monitorarStatusDeVencedor();
                                 }
                             });
 
