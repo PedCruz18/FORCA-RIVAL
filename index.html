@@ -174,6 +174,7 @@
             margin-top: 20px;
             width: 100%;
             overflow: hidden;
+            position: relative;
         }
     
         .teclado button {
@@ -224,6 +225,108 @@
                 padding: 10px;
             }
         }
+        
+        @keyframes shake {
+    0% { 
+        transform: translateX(0);
+        background-color: #f1f1f1; /* Cor normal */
+    }
+    25% { 
+        transform: translateX(-10px);
+        background-color: red; /* Cor vermelha ao "piscar" */
+    }
+    50% { 
+        transform: translateX(10px);
+        background-color: #f1f1f1; /* Cor normal */
+    }
+    75% { 
+        transform: translateX(-10px);
+        background-color: red; /* Cor vermelha ao "piscar" */
+    }
+    100% { 
+        transform: translateX(0);
+        background-color: #f1f1f1; /* Cor normal */
+    }
+}
+
+.teclado.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shakeV {
+    0% { 
+        transform: translateX(0);
+        background-color: #f1f1f1; /* Cor normal */
+    }
+    25% { 
+        transform: translateX(-10px);
+        background-color: rgb(0, 255, 42); /* Cor verde ao "piscar" */
+    }
+    50% { 
+        transform: translateX(10px);
+        background-color: #f1f1f1; /* Cor normal */
+    }
+    75% { 
+        transform: translateX(-10px);
+        background-color: rgb(0, 255, 0); /* Cor verde ao "piscar" */
+    }
+    100% { 
+        transform: translateX(0);
+        background-color: #f1f1f1; /* Cor normal */
+    }
+}
+
+.teclado.shakeV {
+    animation: shakeV 0.5s ease-in-out; /* Aplicando a animação shakeV corretamente */
+
+        /* Efeito visual para o título */
+    h2 {
+        transition: color 0.3s ease;
+    }
+}
+
+.sua-vez {
+    color: green;
+    animation: fadeIn 1s ease-in-out;
+}
+
+.vez-do-oponente {
+    color: red;
+    animation: fadeIn 1s ease-in-out;
+}
+
+/* Animação de fade-in */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Adiciona um pequeno efeito para aumentar a transição */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.pulsando {
+    animation: pulse 0.5s ease-in-out infinite;
+}
     </style>  
     
 </head>
@@ -317,6 +420,8 @@
         let jogador1Id = null;
         let jogador2Id = null;
 
+        let dicaExibida = false; // Variável de controle
+
         // Função para gerar um identificador único
         function gerarIdUnico() {
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -395,11 +500,40 @@
             });
         }
 
+
+
+
+        // Função para configurar o jogo
         function configurarJogo(salaId) {
             // Referência para a sala específica (onde o ID do jogador 1 e jogador 2 estão)
             const salaRef = ref(database, `salas/${salaId}/jogo`);
             const jogador1Ref = ref(database, `salas/${salaId}/jogadores/Jogador 1`); // Posição onde o jogador 1 está armazenado
             const jogador2Ref = ref(database, `salas/${salaId}/jogadores/Jogador 2`); // Posição onde o jogador 2 está armazenado
+
+            const palavrasEDicas = {
+            "ABACAXI": "A casca desta fruta pode ser descrita como uma armadura natural, enquanto sua polpa é um prazer tropical inesperado.",
+            "CACHORRO": "Este ser, com um forte vínculo com o humano, é um eterno companheiro que talvez tenha sido o primeiro a ser domesticado.",
+            "PIPA": "Em um dia com ventos fortes, este objeto ganha vida, cortando os céus de maneira elegante.",
+            "MELANCIA": "Uma fruta que guarda segredos em seu interior, capaz de refrescar, mas que esconde seu doce por trás de uma casca robusta.",
+            "BORBOLETA": "O ciclo de vida desta criatura começa em um estado insignificante, mas ao final, ela conquista o ar com beleza e leveza.",
+            "CARRO": "Um meio de transporte moderno que possibilita viagens rápidas, mas também se tornou símbolo da liberdade e da modernidade.",
+            "CADERNO": "Entre páginas em branco, o pensamento ganha forma e é imortalizado. Seus segredos são guardados em silêncio.",
+            "JOGO": "Em sua essência, este conceito é sobre competição, estratégia e regras. Mas no fundo, trata-se de uma busca pelo prazer e pela vitória.",
+            "ROSA": "Com suas pétalas delicadas e seu perfume inebriante, esta flor é a representação máxima da paixão e do mistério.",
+            "RUA": "Esta via não apenas conecta lugares, mas também histórias, passos e destinos, sendo testemunha do ir e vir da humanidade.",
+            "ESTRELA": "Apesar de ser distante, ela brilha em nossa noite como um farol, um eterno ponto de referência que guia os sonhos.",
+            "FLORESTA": "Misteriosa e intocada, ela abriga em seu interior seres que seguem um ritmo milenar, longe dos olhos humanos.",
+            "AMARELO": "Essa cor carrega consigo a energia do sol, mas também a promessa de otimismo e renovação.",
+            "LIVRO": "Entre suas capas, mundos inteiros são revelados, onde palavras dançam e se entrelaçam em histórias intermináveis.",
+            "SOL": "Sua presença é vital, mas sua força pode ser tanto benéfica quanto destrutiva. É o centro de tudo, mas também o maior mistério."
+        };
+
+            // Escolher uma palavra aleatória da lista de palavras
+            const palavras = Object.keys(palavrasEDicas);
+            const palavraEscolhida = palavras[Math.floor(Math.random() * palavras.length)];
+
+            // Dica associada à palavra escolhida
+            const dicaEscolhida = palavrasEDicas[palavraEscolhida];
 
             // Log para verificar os valores de jogador1Id e jogador2Id
             console.log("Valores dos jogadores antes da busca:", { jogador1Id, jogador2Id });
@@ -422,14 +556,18 @@
 
                 // Agora que temos ambos os jogadores, podemos configurar o jogo
                 set(salaRef, {
-                    palavra: "HELLO", // Definir uma palavra de exemplo (você pode usar uma palavra aleatória ou mais complexa)
-                    palavraAtualizada: "_ _ _ _ _", // Inicializar a palavra com underscores
+                    palavra: palavraEscolhida, // Definir uma palavra aleatória da lista
+                    dica: dicaEscolhida, // Definir a dica associada à palavra escolhida
+                    palavraAtualizada: "_ ".repeat(palavraEscolhida.length).trim(), // Inicializar a palavra com underscores
                     tentativas: [], // Inicializar as tentativas de letras erradas
                     jogadores: { jogador1Id, jogador2Id }, // Inicializar a lista de jogadores
                     jogadaAtual: jogador1Id, // Definir o primeiro jogador como o jogador da vez
+                    status: "Jogo em Andamento.." // Definir o status do jogo
                 }).then(() => {
                     console.log("Jogo configurado com sucesso!");
-                    // Iniciar o processo de verificação de palavra ou outras configurações
+                    
+                    // Monitorar o status do jogo para verificar quando ele está "em andamento"
+                    monitorarStatusDoJogo(salaId);
                     configurarPalavra(salaRef);
                 }).catch((error) => {
                     console.error("Erro ao configurar o jogo:", error);
@@ -438,6 +576,106 @@
                 console.error("Erro ao recuperar os jogadores do Firebase:", error);
             });
         }
+
+        // Função para monitorar o status do jogo uma única vez
+        function monitorarStatusDoJogo(salaId) {
+            const salaRef = ref(database, `salas/${salaId}/jogo`);
+
+            // Usar 'once' para obter o valor apenas uma vez, sem monitorar mudanças futuras
+            get(salaRef).then((snapshot) => {
+                const jogo = snapshot.val();
+
+                // Verificar se o status do jogo é "Jogo em Andamento.."
+                if (jogo && jogo.status === "Jogo em Andamento.." && !dicaExibida) {
+                    // Mostrar o container com a dica
+                    mostrarContainerComDica(jogo.dica);
+                    dicaExibida = true; // Marcar que a dica foi exibida
+                }
+            }).catch((error) => {
+                console.error("Erro ao monitorar o status do jogo:", error);
+            });
+        }
+
+        // Função para mostrar o container com a dica de forma moderna e centralizada
+        function mostrarContainerComDica(dica) {
+            const containerExistente = document.getElementById('container-dica');
+            if (containerExistente) {
+                // Se o container já existir, não fazer nada
+                return;
+            }
+
+            // Criar o container principal
+            const container = document.createElement('div');
+            container.id = 'container-dica';
+            container.style.position = 'fixed';
+            container.style.top = '0';
+            container.style.left = '0';
+            container.style.width = '100%';
+            container.style.height = '100%';
+            container.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+            container.style.color = 'white';
+            container.style.display = 'flex';
+            container.style.flexDirection = 'column'; // Organiza os elementos em uma coluna
+            container.style.justifyContent = 'center';
+            container.style.alignItems = 'center';
+            container.style.zIndex = '9999';
+            container.style.transition = 'opacity 0.5s ease'; // Animação suave de entrada
+            container.style.opacity = '0'; // Começar invisível
+
+            // Animação de fade-in para o container
+            setTimeout(() => {
+                container.style.opacity = '1'; // Ficar visível
+            }, 50);
+
+            // Criar o texto da dica
+            const dicaTexto = document.createElement('div');
+            dicaTexto.textContent = `Dica: ${dica}`;
+            dicaTexto.style.fontSize = '28px';
+            dicaTexto.style.fontFamily = 'Arial, sans-serif';
+            dicaTexto.style.fontWeight = 'bold';
+            dicaTexto.style.marginBottom = '30px';
+            dicaTexto.style.textAlign = 'center';
+
+            // Criar a barra de progresso
+            const barraProgresso = document.createElement('div');
+            barraProgresso.style.width = '80%';
+            barraProgresso.style.height = '8px';
+            barraProgresso.style.backgroundColor = '#ddd';
+            barraProgresso.style.borderRadius = '5px';
+            barraProgresso.style.marginTop = '20px'; // Margem acima da barra de progresso para espaço
+
+            const progresso = document.createElement('div');
+            progresso.style.height = '100%';
+            progresso.style.width = '0';
+            progresso.style.backgroundColor = '#4caf50';
+            progresso.style.transition = 'width 5s ease'; // Transição suave para a barra de progresso
+
+            barraProgresso.appendChild(progresso);
+
+            // Adicionar os elementos no container
+            container.appendChild(dicaTexto); // Primeiro o texto da dica
+            container.appendChild(barraProgresso); // Depois a barra de progresso
+
+            // Adicionar o container ao corpo da página
+            document.body.appendChild(container);
+
+            // Iniciar a animação da barra de progresso
+            setTimeout(() => {
+                progresso.style.width = '100%'; // Começar o progresso
+            }, 50);
+
+            // Remover o container após 5 segundos
+            setTimeout(() => {
+                container.style.opacity = '0'; // Fazer desaparecer suavemente
+                setTimeout(() => {
+                    document.body.removeChild(container); // Remover do DOM após o fade-out
+                    dicaExibida = false; // Resetar o controle para permitir exibição novamente
+                }, 500); // Esperar o tempo do fade-out
+            }, 5000); // Após 5 segundos
+        }
+
+
+
 
         // Função para atualizar a palavra na tela
         function atualizarPalavra() {
@@ -492,93 +730,135 @@
                         botao.addEventListener('click', () => verificarLetra(letra));
                         teclado.appendChild(botao);
                     });
+
+                    // Atualiza o título para "Sua Vez"
+                    atualizarTituloTurno("Sua Vez");
                 } else {
                     // Caso contrário, exibe mensagem de espera
                     const mensagem = document.createElement('p');
-                    mensagem.textContent = "Aguardando sua vez...";
+                    mensagem.textContent = "Vez do Oponente";
                     teclado.appendChild(mensagem);
+
+                    // Atualiza o título para "Vez do Oponente"
+                    atualizarTituloTurno("Vez do Oponente");
                 }
             }).catch((error) => {
                 console.error("Erro ao acessar os dados da sala:", error);
             });
         }
 
-        function verificarLetra(letra) {
-                if (!palavra) return;
+        function atualizarTituloTurno(tituloTexto) {
+            const titulo = document.querySelector('.game-container h2');
+            titulo.textContent = tituloTexto;
 
-                // Referências da sala e do jogador da vez
-                const salaId = salaIdElement.textContent;
-                const jogadaAtualRef = ref(database, `salas/${salaId}/jogo/jogadaAtual`); // Referência para o jogador da vez
+            // Remover as animações e classes anteriores
+            titulo.classList.remove('sua-vez', 'vez-do-oponente', 'pulsando');
 
-                // Verificar se a letra já foi usada
-                if (letrasUsadas.includes(letra)) {
-                    alert("Esta letra já foi usada!");
-                    return;
-                }
-                letrasUsadas.push(letra);
-
-                // Obter o jogador atual e verificar se é a vez dele
-                get(jogadaAtualRef).then((snapshot) => {
-                    const jogadorDaVezId = snapshot.val(); // ID do jogador da vez
-
-                    // Garantir que o jogador da vez está jogando
-                    if (jogadorDaVezId !== jogadorId) {
-                        alert("Não é sua vez!");
-                        return;
-                    }
-
-                    // Processo de verificação da letra
-                    let acertou = false;
-                    for (let i = 0; i < palavra.length; i++) {
-                        if (palavra[i].toUpperCase() === letra) {
-                            letrasCorretas[i] = letra;
-                            acertou = true;
-                        }
-                    }
-
-                    // Log indicando se o jogador acertou ou não
-                    if (acertou) {
-                        console.log(`Jogador ${jogadorId} acertou a letra "${letra}"!`);
-                    } else {
-                        console.log(`Jogador ${jogadorId} errou a letra "${letra}".`);
-                    }
-
-                    // Se o jogador não acertar a letra, trocar o turno
-                    if (!acertou) {
-                        // Alternar para o próximo jogador
-                        const proximoJogadorId = (jogadorDaVezId === jogador1Id) ? jogador2Id : jogador1Id;
-
-                        if (proximoJogadorId) {
-                            console.log(`Turno trocado: de ${jogadorDaVezId} para ${proximoJogadorId}`);
-                            set(jogadaAtualRef, proximoJogadorId) // Atualiza o jogador da vez no Firebase
-                                .then(() => {
-                                    console.log(`Jogador da vez atualizado para ${proximoJogadorId}`);
-                                })
-                                .catch((error) => {
-                                    console.error("Erro ao atualizar o jogador da vez no Firebase:", error);
-                                });
-                        } else {
-                            console.error("Erro ao determinar o próximo jogador. Verifique as variáveis jogador1Id e jogador2Id.");
-                        }
-                    } else {
-                        console.log("Letra correta! O jogador atual continua jogando.");
-                    }
-
-                    // Atualizar as informações no Firebase (palavra e tentativas)
-                    update(ref(database, `salas/${salaId}/jogo`), {
-                        palavraAtualizada: letrasCorretas.join(' '),
-                        tentativas: letrasUsadas
-                    }).catch((error) => {
-                        console.error("Erro ao atualizar o estado do jogo no Firebase:", error);
-                    });
-
-                    // Verificar se o jogador venceu após a jogada
-                    verificarVencedor();
-                }).catch((error) => {
-                    console.error("Erro ao acessar a jogada atual:", error);
-                });
+            // Adicionar a classe correspondente com animação
+            if (tituloTexto === "Sua Vez") {
+                titulo.classList.add('sua-vez');
+            } else if (tituloTexto === "Vez do Oponente") {
+                titulo.classList.add('vez-do-oponente');
             }
 
+            // Ativar animação de pulsação (opcional)
+            titulo.classList.add('pulsando');
+            
+            // Remover a animação de pulsação após 1 segundo (quando o efeito de transição acabar)
+            setTimeout(() => {
+                titulo.classList.remove('pulsando');
+            }, 1000);  // Tempo em milissegundos para a duração da animação de pulsação
+        }
+
+
+        function verificarLetra(letra) {
+            if (!palavra) return;
+
+            // Referências da sala e do jogador da vez
+            const salaId = salaIdElement.textContent;
+            const jogadaAtualRef = ref(database, `salas/${salaId}/jogo/jogadaAtual`); // Referência para o jogador da vez
+
+            // Verificar se a letra já foi usada
+            if (letrasUsadas.includes(letra)) {
+                alert("Esta letra já foi usada!");
+                return;
+            }
+            letrasUsadas.push(letra);
+
+            // Obter o jogador atual e verificar se é a vez dele
+            get(jogadaAtualRef).then((snapshot) => {
+                const jogadorDaVezId = snapshot.val(); // ID do jogador da vez
+
+                // Garantir que o jogador da vez está jogando
+                if (jogadorDaVezId !== jogadorId) {
+                    alert("Não é sua vez!");
+                    return;
+                }
+
+                // Processo de verificação da letra
+                let acertou = false;
+                for (let i = 0; i < palavra.length; i++) {
+                    if (palavra[i].toUpperCase() === letra) {
+                        letrasCorretas[i] = letra;
+                        acertou = true;
+                    }
+                }
+
+                // Log indicando se o jogador acertou ou não
+                if (acertou) {
+                    console.log(`Jogador ${jogadorId} acertou a letra "${letra}"!`);
+
+                    // Se o jogador acertou, adicionar o efeito de shakeV
+                    let teclado = document.getElementById('teclado');
+                    teclado.classList.add('shakeV');
+                    setTimeout(() => {
+                        teclado.classList.remove('shakeV');
+                    }, 1000);
+
+
+                } else {
+                    console.log(`Jogador ${jogadorId} errou a letra "${letra}".`);
+
+                    // Se o jogador errou, adicionar o efeito de shake
+                    let teclado = document.getElementById('teclado');
+                    teclado.classList.add('shake');
+                    setTimeout(() => {
+                        teclado.classList.remove('shake');
+                    }, 1000);
+                    
+                }
+
+
+                // Se o jogador não acertar a letra, trocar o turno
+                if (!acertou) {
+                    const proximoJogadorId = (jogadorDaVezId === jogador1Id) ? jogador2Id : jogador1Id;
+                    if (proximoJogadorId) {
+                        set(jogadaAtualRef, proximoJogadorId)
+                            .then(() => {
+                                console.log(`Jogador da vez atualizado para ${proximoJogadorId}`);
+                            })
+                            .catch((error) => {
+                                console.error("Erro ao atualizar o jogador da vez no Firebase:", error);
+                            });
+                    }
+                }
+
+
+                // Atualizar as informações no Firebase
+                update(ref(database, `salas/${salaId}/jogo`), {
+                    palavraAtualizada: letrasCorretas.join(' '),
+                    tentativas: letrasUsadas
+                }).catch((error) => {
+                    console.error("Erro ao atualizar o estado do jogo no Firebase:", error);
+                });
+
+                // Verificar se o jogador venceu após a jogada
+                verificarVencedor();
+            }).catch((error) => {
+                console.error("Erro ao acessar a jogada atual:", error);
+            });
+        }
+     
         function getRandomItems(arr, n) {
             let result = [];
             let len = arr.length;
