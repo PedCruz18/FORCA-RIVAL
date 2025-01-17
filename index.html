@@ -351,7 +351,7 @@
     
 
     <div class="game-container" id="gameContainer" style="display: none;">
-        <h2>Jogo em andamento...</h2>
+        <h2>Jogo</h2>
         <div class="palavra" id="palavra">_ _ _ _ _</div>
         <div class="teclado" id="teclado"></div>
     </div>
@@ -420,8 +420,6 @@
         let jogador1Id = null;
         let jogador2Id = null;
 
-        let dicaExibida = false; // Variável de controle
-
         // Função para gerar um identificador único
         function gerarIdUnico() {
             return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -464,7 +462,6 @@
             }
         });
 
-    
         function iniciarJogo() {
             const salaId = salaIdElement.textContent; // Pega o ID da sala atual
             const salaRef = ref(database, `salas/${salaId}`);  // Referência à sala específica
@@ -499,9 +496,6 @@
                 criarTeclado();
             });
         }
-
-
-
 
         // Função para configurar o jogo
         function configurarJogo(salaId) {
@@ -565,6 +559,7 @@
                     status: "Jogo em Andamento.." // Definir o status do jogo
                 }).then(() => {
                     console.log("Jogo configurado com sucesso!");
+                    console.log("Foi passada esta >",dicaEscolhida);
                     
                     // Monitorar o status do jogo para verificar quando ele está "em andamento"
                     monitorarStatusDoJogo(salaId);
@@ -577,106 +572,123 @@
             });
         }
 
-        // Função para monitorar o status do jogo uma única vez
+        // Variável para controlar se o container já foi criado
+        let containerCriado = false;
+
+        // Função para monitorar o status do jogo em tempo real
         function monitorarStatusDoJogo(salaId) {
             const salaRef = ref(database, `salas/${salaId}/jogo`);
 
-            // Usar 'once' para obter o valor apenas uma vez, sem monitorar mudanças futuras
-            get(salaRef).then((snapshot) => {
+            // Usar 'on' para monitorar mudanças na referência do status do jogo em tempo real
+            onValue(salaRef, (snapshot) => {
                 const jogo = snapshot.val();
 
                 // Verificar se o status do jogo é "Jogo em Andamento.."
-                if (jogo && jogo.status === "Jogo em Andamento.." && !dicaExibida) {
-                    // Mostrar o container com a dica
-                    mostrarContainerComDica(jogo.dica);
-                    dicaExibida = true; // Marcar que a dica foi exibida
+                if (jogo && jogo.status === "Jogo em Andamento..") {
+                    // Puxar a dica diretamente da referência 'salas/{salaId}/jogo/dica'
+                    const dicaRef = ref(database, `salas/${salaId}/jogo/dica`);
+
+                    // Usar 'on' para monitorar mudanças na dica em tempo real
+                    onValue(dicaRef, (dicaSnapshot) => {
+                        const dicaF = dicaSnapshot.val(); // Armazenar a dica diretamente da referência do Firebase
+
+                        if (dicaF) {
+                            // Exibir ou atualizar o container com a dica em tempo real
+                            mostrarContainerComDica(dicaF); // Passar diretamente o valor da dica
+                        } else {
+                            console.log("Dica não encontrada no Firebase.");
+                        }
+                    }, (error) => {
+                        console.error("Erro ao obter a dica do Firebase:", error);
+                    });
                 }
-            }).catch((error) => {
+            }, (error) => {
                 console.error("Erro ao monitorar o status do jogo:", error);
             });
         }
 
-        // Função para mostrar o container com a dica de forma moderna e centralizada
-        function mostrarContainerComDica(dica) {
-            const containerExistente = document.getElementById('container-dica');
-            if (containerExistente) {
-                // Se o container já existir, não fazer nada
-                return;
-            }
+        function mostrarContainerComDica(dicaF) {
+            if (!containerCriado) {
+                // Se o container ainda não foi criado, cria o novo container
+                const containerExistente = document.createElement('div');
+                containerExistente.id = 'container-dica';
+                containerExistente.style.position = 'fixed';
+                containerExistente.style.top = '0';
+                containerExistente.style.left = '0';
+                containerExistente.style.width = '100%';
+                containerExistente.style.height = '100%';
+                containerExistente.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+                containerExistente.style.color = 'white';
+                containerExistente.style.display = 'flex';
+                containerExistente.style.flexDirection = 'column';
+                containerExistente.style.justifyContent = 'center';
+                containerExistente.style.alignItems = 'center';
+                containerExistente.style.zIndex = '9999';
+                containerExistente.style.transition = 'opacity 0.5s ease';
+                containerExistente.style.opacity = '0';
 
-            // Criar o container principal
-            const container = document.createElement('div');
-            container.id = 'container-dica';
-            container.style.position = 'fixed';
-            container.style.top = '0';
-            container.style.left = '0';
-            container.style.width = '100%';
-            container.style.height = '100%';
-            container.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-            container.style.color = 'white';
-            container.style.display = 'flex';
-            container.style.flexDirection = 'column'; // Organiza os elementos em uma coluna
-            container.style.justifyContent = 'center';
-            container.style.alignItems = 'center';
-            container.style.zIndex = '9999';
-            container.style.transition = 'opacity 0.5s ease'; // Animação suave de entrada
-            container.style.opacity = '0'; // Começar invisível
-
-            // Animação de fade-in para o container
-            setTimeout(() => {
-                container.style.opacity = '1'; // Ficar visível
-            }, 50);
-
-            // Criar o texto da dica
-            const dicaTexto = document.createElement('div');
-            dicaTexto.textContent = `Dica: ${dica}`;
-            dicaTexto.style.fontSize = '28px';
-            dicaTexto.style.fontFamily = 'Arial, sans-serif';
-            dicaTexto.style.fontWeight = 'bold';
-            dicaTexto.style.marginBottom = '30px';
-            dicaTexto.style.textAlign = 'center';
-
-            // Criar a barra de progresso
-            const barraProgresso = document.createElement('div');
-            barraProgresso.style.width = '80%';
-            barraProgresso.style.height = '8px';
-            barraProgresso.style.backgroundColor = '#ddd';
-            barraProgresso.style.borderRadius = '5px';
-            barraProgresso.style.marginTop = '20px'; // Margem acima da barra de progresso para espaço
-
-            const progresso = document.createElement('div');
-            progresso.style.height = '100%';
-            progresso.style.width = '0';
-            progresso.style.backgroundColor = '#4caf50';
-            progresso.style.transition = 'width 5s ease'; // Transição suave para a barra de progresso
-
-            barraProgresso.appendChild(progresso);
-
-            // Adicionar os elementos no container
-            container.appendChild(dicaTexto); // Primeiro o texto da dica
-            container.appendChild(barraProgresso); // Depois a barra de progresso
-
-            // Adicionar o container ao corpo da página
-            document.body.appendChild(container);
-
-            // Iniciar a animação da barra de progresso
-            setTimeout(() => {
-                progresso.style.width = '100%'; // Começar o progresso
-            }, 50);
-
-            // Remover o container após 5 segundos
-            setTimeout(() => {
-                container.style.opacity = '0'; // Fazer desaparecer suavemente
+                // Animação de fade-in para o container
                 setTimeout(() => {
-                    document.body.removeChild(container); // Remover do DOM após o fade-out
-                    dicaExibida = false; // Resetar o controle para permitir exibição novamente
-                }, 500); // Esperar o tempo do fade-out
-            }, 15000); // Após 5 segundos
-        }
+                    containerExistente.style.opacity = '1';
+                }, 50);
 
+                // Criar o texto da dica
+                const dicaTexto = document.createElement('div');
+                dicaTexto.id = 'dica-texto';
+                dicaTexto.textContent = `Dica: ${dicaF}`;
+                dicaTexto.style.fontSize = '28px';
+                dicaTexto.style.fontFamily = 'Arial, sans-serif';
+                dicaTexto.style.fontWeight = 'bold';
+                dicaTexto.style.marginBottom = '30px';
+                dicaTexto.style.textAlign = 'center';
 
+                // Criar a barra de progresso
+                const barraProgresso = document.createElement('div');
+                barraProgresso.style.width = '80%';
+                barraProgresso.style.height = '8px';
+                barraProgresso.style.backgroundColor = '#ddd';
+                barraProgresso.style.borderRadius = '5px';
+                barraProgresso.style.marginTop = '20px';
 
+                const progresso = document.createElement('div');
+                progresso.style.height = '100%';
+                progresso.style.width = '0';
+                progresso.style.backgroundColor = '#4caf50';
+                progresso.style.transition = 'width 5s ease';
 
+                barraProgresso.appendChild(progresso);
+
+                // Adicionar os elementos no container
+                containerExistente.appendChild(dicaTexto); // Primeiro o texto da dica
+                containerExistente.appendChild(barraProgresso); // Depois a barra de progresso
+
+                // Adicionar o container ao corpo da página
+                document.body.appendChild(containerExistente);
+
+                // Iniciar a animação da barra de progresso
+                setTimeout(() => {
+                    progresso.style.width = '100%'; // Começar o progresso
+                }, 1050);
+
+                // Remover o container após 15 segundos
+                setTimeout(() => {
+                    containerExistente.style.opacity = '0'; // Fazer desaparecer suavemente
+                    setTimeout(() => {
+                        document.body.removeChild(containerExistente); // Remover do DOM após o fade-out
+                    }, 500);
+                }, 15000);
+
+                // Marcar que o container foi criado
+                containerCriado = true;
+            } else {
+                // Se o container já existe, apenas atualize o texto da dica em tempo real
+                const dicaTexto = document.getElementById('dica-texto');
+                if (dicaTexto) {
+                    dicaTexto.textContent = `Dica: ${dicaF}`; // Atualizar o texto da dica
+                }
+            }
+        } 
+        
         // Função para atualizar a palavra na tela
         function atualizarPalavra() {
             if (palavra) {
@@ -769,7 +781,6 @@
                 titulo.classList.remove('pulsando');
             }, 1000);  // Tempo em milissegundos para a duração da animação de pulsação
         }
-
 
         function verificarLetra(letra) {
             if (!palavra) return;
@@ -960,6 +971,9 @@
                     })
                         .then(() => {
                             console.log(`Dados da sala com ID ${salaId} limpos com sucesso.`);
+
+                            // Resetar as variáveis locais
+                            resetarVariaveisJogo();
                         })
                         .catch((error) => {
                             console.error("Erro ao limpar os dados da sala:", error);
@@ -968,6 +982,36 @@
                 .catch((error) => {
                     console.error("Erro ao verificar a existência da sala:", error);
                 });
+        }
+
+        function resetarVariaveisJogo() {
+            // Resetar variáveis locais usadas no jogo
+            palavra = "";
+            letrasCorretas = [];
+            letrasUsadas = [];
+            jogador1Id = null;
+            jogador2Id = null;
+            jogadorId = null;
+            turno = 1;
+            statusJogo = "inicial";
+            dicaExibida = null;
+
+            // Resetar variáveis específicas que são usadas nas funções do jogo
+            salaRef = null;
+            jogador1Ref = null;
+            jogador2Ref = null;
+            palavrasEDicas = {};
+            palavras = [];
+            palavraEscolhida = "";
+            dicaEscolhida = "";
+
+            // Resetar o container de dica, se necessário
+            const containerExistente = document.getElementById('container-dica');
+            if (containerExistente) {
+                document.body.removeChild(containerExistente); // Remover o container da dica se estiver presente
+            }
+
+            // Outras variáveis adicionais, caso necessário...
         }
 
         // Função para reiniciar a interface após o jogo terminar
